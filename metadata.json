@@ -1,0 +1,8 @@
+{
+  "name": "RUET Alumni Network",
+  "description": "A modern, aesthetic, and functional platform designed to bridge the gap between RUET alumni, students, and faculty through networking, mentorship, and career opportunities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
