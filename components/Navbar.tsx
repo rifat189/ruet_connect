@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Network, Search, Bell, LogOut, LayoutDashboard, User, 
   X, Briefcase, Calendar, UserCheck, MessageSquare, Clock,
-  ChevronRight, Sparkles, BellOff
+  ChevronRight, Sparkles, BellOff, Menu
 } from 'lucide-react';
 import { useAuth } from '../App';
 import { db } from '../db';
@@ -17,6 +17,7 @@ const Navbar: React.FC = () => {
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   
@@ -76,6 +77,7 @@ const Navbar: React.FC = () => {
 
   const handleResultClick = (path: string) => {
     setIsSearchOpen(false);
+    setIsMobileMenuOpen(false);
     setSearchQuery('');
     navigate(path);
   };
@@ -92,28 +94,45 @@ const Navbar: React.FC = () => {
     }
   };
 
+  const navLinks = [
+    { label: 'Network', path: '/network' },
+    { label: 'Jobs', path: '/jobs' },
+    { label: 'Mentorship', path: '/mentorship' },
+    { label: 'Events', path: '/events' },
+  ];
+
   return (
     <nav className="sticky top-0 z-50 glass border-b border-white/20 px-4 md:px-12 py-4 flex items-center justify-between backdrop-blur-xl">
-      <Link to="/" className="flex items-center gap-2 group shrink-0">
-        <div className="gradient-bg p-2 rounded-xl text-white shadow-md group-hover:scale-105 transition-transform">
-          <Network size={20} />
-        </div>
-        <span className="font-black text-xl tracking-tighter text-slate-900">
-          RUET<span className="text-blue-600">Connect</span>
-        </span>
-      </Link>
+      <div className="flex items-center gap-4">
+        {/* Mobile Menu Toggle */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        <Link to="/" className="flex items-center gap-2 group shrink-0">
+          <div className="gradient-bg p-2 rounded-xl text-white shadow-md group-hover:scale-105 transition-transform">
+            <Network size={20} />
+          </div>
+          <span className="font-black text-xl tracking-tighter text-slate-900">
+            RUET<span className="text-blue-600">Connect</span>
+          </span>
+        </Link>
+      </div>
 
       {/* Nav Links - Desktop */}
       <div className="hidden lg:flex items-center gap-8">
-        {['Network', 'Jobs', 'Mentorship', 'Events'].map((item) => (
+        {navLinks.map((item) => (
           <Link
-            key={item}
-            to={`/${item.toLowerCase()}`}
+            key={item.label}
+            to={item.path}
             className={`text-sm font-bold tracking-tight transition-all hover:text-blue-600 ${
-              location.pathname === `/${item.toLowerCase()}` ? 'text-blue-600' : 'text-slate-500'
+              location.pathname === item.path ? 'text-blue-600' : 'text-slate-500'
             }`}
           >
-            {item}
+            {item.label}
           </Link>
         ))}
       </div>
@@ -249,7 +268,7 @@ const Navbar: React.FC = () => {
             <Link to={`/profile/${user.id}`} className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
               <img src={user.avatar} className="w-full h-full object-cover" />
             </Link>
-            <button onClick={logout} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+            <button onClick={logout} className="hidden sm:block p-2 text-slate-400 hover:text-red-500 transition-colors">
               <LogOut size={18} />
             </button>
           </div>
@@ -259,6 +278,64 @@ const Navbar: React.FC = () => {
           </Link>
         )}
       </div>
+
+      {/* Mobile/Tablet Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 top-[73px] z-40 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200 lg:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <div 
+            className="absolute top-0 left-0 w-full max-w-xs h-screen bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-6 flex-grow">
+              <div className="pb-6 border-b border-slate-100">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Navigation</p>
+                <div className="space-y-1">
+                  {navLinks.map((item) => (
+                    <Link
+                      key={item.label}
+                      to={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between p-4 rounded-2xl font-black text-lg transition-all ${
+                        location.pathname === item.path 
+                          ? 'bg-blue-50 text-blue-600' 
+                          : 'text-slate-900 hover:bg-slate-50'
+                      }`}
+                    >
+                      {item.label}
+                      <ChevronRight size={20} className={location.pathname === item.path ? 'opacity-100' : 'opacity-20'} />
+                    </Link>
+                  ))}
+                  {user?.role === 'Admin' && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 p-4 rounded-2xl font-black text-lg text-slate-900 hover:bg-slate-50"
+                    >
+                      <LayoutDashboard size={20} /> Admin Dashboard
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {user && (
+                <div className="pt-2">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Account</p>
+                  <button 
+                    onClick={() => { logout(); setIsMobileMenuOpen(false); navigate('/'); }}
+                    className="w-full flex items-center gap-3 p-4 rounded-2xl font-black text-lg text-red-500 hover:bg-red-50 transition-all"
+                  >
+                    <LogOut size={20} /> Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-auto pt-6 border-t border-slate-100 text-center">
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">RUETConnect v2.5</p>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
