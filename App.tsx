@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Auth from './pages/Auth';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
+import Feed from './pages/Feed';
 import { db } from './db';
 import { User } from './types';
 
@@ -99,6 +100,7 @@ const App: React.FC = () => {
                 path="/auth" 
                 element={currentUser ? <Navigate to="/" replace /> : <Auth />} 
               />
+              <Route path="/feed" element={<Feed />} />
               <Route path="/network" element={<Network />} />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/mentorship" element={<Mentorship />} />

@@ -42,6 +42,33 @@ export interface User {
   projects?: Project[];
   experience?: Experience[];
   isVerified?: boolean;
+  connections?: string[];
+}
+
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  content: string;
+  timestamp: number;
+}
+
+export interface Post {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  userRole: UserRole;
+  content: string;
+  timestamp: number;
+  media?: {
+    type: 'image' | 'video';
+    url: string;
+  }[];
+  likes: number;
+  likedBy: string[]; // Track user IDs who liked the post
+  comments: Comment[];
 }
 
 export interface Job {
@@ -75,7 +102,7 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type: 'connection' | 'job' | 'event' | 'system' | 'mentorship';
+  type: 'connection' | 'job' | 'event' | 'system' | 'mentorship' | 'post';
   timestamp: number;
   isRead: boolean;
   link?: string;

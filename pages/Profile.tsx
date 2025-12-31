@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { db } from '../db';
 import { useAuth } from '../App';
-import { User, Project, Experience } from '../types';
+import { User, Project, Experience, Post } from '../types';
 import { 
   Linkedin, Github, Twitter, Globe, GraduationCap, MapPin, 
   Building2, Trophy, Briefcase, Plus, X, Edit3, Save, Camera,
   ExternalLink, Calendar, Trash2, ShieldCheck, UserPlus, CheckCircle,
-  Layout, Link as LinkIcon, Code
+  Layout, Link as LinkIcon, Code, Heart, MessageSquare, Sparkles
 } from 'lucide-react';
 
 const Profile: React.FC = () => {
@@ -20,6 +20,8 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState<User | null>(null);
   const [showToast, setShowToast] = useState<string | null>(null);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [showAllPosts, setShowAllPosts] = useState(false);
 
   const isOwner = authUser?.id === id;
 
@@ -29,6 +31,9 @@ const Profile: React.FC = () => {
     if (foundUser) {
       setProfileUser(foundUser);
       setEditedUser(JSON.parse(JSON.stringify(foundUser)));
+      
+      const allPosts = db.getPosts();
+      setUserPosts(allPosts.filter(p => p.userId === id));
     }
   }, [id]);
 
@@ -130,6 +135,7 @@ const Profile: React.FC = () => {
   }
 
   const profile = isEditing ? editedUser! : profileUser;
+  const displayedPosts = showAllPosts ? userPosts : userPosts.slice(0, 2);
 
   return (
     <div className="pb-24 relative bg-slate-50/50">
@@ -470,6 +476,50 @@ const Profile: React.FC = () => {
 
           {/* Right Main Content */}
           <div className="lg:col-span-2 space-y-12">
+            {/* Posts Section */}
+            <section>
+              <div className="flex items-center justify-between mb-10">
+                <h2 className="text-3xl font-black text-slate-900 flex items-center gap-4 tracking-tighter">
+                  <Sparkles className="text-blue-600" size={32} /> Recent Activity
+                </h2>
+                {userPosts.length > 2 && (
+                  <button 
+                    onClick={() => setShowAllPosts(!showAllPosts)} 
+                    className="text-blue-600 font-black text-xs hover:underline uppercase tracking-widest"
+                  >
+                    {showAllPosts ? 'Show Less' : `See All Posts (${userPosts.length})`}
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-6">
+                {userPosts.length === 0 ? (
+                  <div className="p-16 text-center bg-white rounded-[3rem] border border-dashed border-slate-200">
+                    <p className="text-slate-400 font-bold italic">No posts shared by this user yet.</p>
+                  </div>
+                ) : (
+                  displayedPosts.map((post) => (
+                    <div key={post.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                      <p className="text-slate-600 font-medium leading-relaxed mb-6 line-clamp-3">{post.content}</p>
+                      {post.media && post.media.length > 0 && (
+                        <div className="rounded-2xl overflow-hidden mb-6 h-48">
+                          <img src={post.media[0].url} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-6 border-t border-slate-50">
+                        <div className="flex items-center gap-6">
+                          <span className="flex items-center gap-1.5 text-slate-400 text-xs font-bold"><Heart size={16} /> {post.likes}</span>
+                          {/* Fix: Render the length of the comments array instead of the array itself to avoid TypeScript error */}
+                          <span className="flex items-center gap-1.5 text-slate-400 text-xs font-bold"><MessageSquare size={16} /> {post.comments.length}</span>
+                        </div>
+                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{new Date(post.timestamp).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+
             {/* Experience Section */}
             <section>
               <div className="flex items-center justify-between mb-10">

@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Network, Search, Bell, LogOut, LayoutDashboard, User, 
   X, Briefcase, Calendar, UserCheck, MessageSquare, Clock,
-  ChevronRight, Sparkles, BellOff, Menu
+  ChevronRight, Sparkles, BellOff, Menu, Layout
 } from 'lucide-react';
 import { useAuth } from '../App';
 import { db } from '../db';
@@ -95,6 +95,7 @@ const Navbar: React.FC = () => {
   };
 
   const navLinks = [
+    { label: 'Feed', path: '/feed' },
     { label: 'Network', path: '/network' },
     { label: 'Jobs', path: '/jobs' },
     { label: 'Mentorship', path: '/mentorship' },
@@ -245,7 +246,7 @@ const Navbar: React.FC = () => {
                         n.type === 'event' ? 'bg-orange-50 text-orange-600' :
                         'bg-blue-50 text-blue-600'
                       }`}>
-                        {n.type === 'job' ? <Briefcase size={18} /> : n.type === 'event' ? <Calendar size={18} /> : <UserCheck size={18} />}
+                        {n.type === 'job' ? <Briefcase size={18} /> : n.type === 'event' ? <Calendar size={18} /> : n.type === 'post' ? <Layout size={18} /> : <UserCheck size={18} />}
                       </div>
                       <div className="flex-grow min-w-0">
                         <div className="flex justify-between items-start">
